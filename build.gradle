@@ -1,0 +1,112 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+ext {
+    set('junitVersion', '5.7.0')
+    set('javaxMailVersion', '1.6.2')
+    set('lombokVersion', '1.18.22')
+    set('commonsLoggingVersion', '1.2')
+}
+
+dependencies {
+    implementation "com.sun.mail:javax.mail:${javaxMailVersion}"
+    implementation "commons-logging:commons-logging:${commonsLoggingVersion}"
+}
+
+configure(allprojects) { project ->
+    apply plugin: "java"
+    apply plugin: "idea"
+
+    group = 'com.soulcraft.utils.email'
+    version = '1.0.0'
+
+    repositories {
+        mavenCentral()
+    }
+
+    configurations {
+        developmentOnly
+        runtimeClasspath {
+            extendsFrom developmentOnly
+        }
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    compileJava {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+        options.encoding = 'UTF-8'
+    }
+
+    compileTestJava {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+        options.encoding = 'UTF-8'
+    }
+
+    sourceSets {
+        main {
+            resources {
+                srcDirs = ["src/main/resources"]
+            }
+        }
+    }
+
+    idea {
+        module {
+            downloadSources = true
+        }
+    }
+
+    jar {
+        // add more manifest attributes
+        manifest {
+            attributes(
+                    "Implementation-Title": project.name,
+                    "Implementation-Version": project.version,
+                    "Build-JDK": "${System.getProperty('java.version')} (${System.getProperty('java.vendor')} ${System.getProperty('java.vm.version')})",
+                    "Build-OS": "${System.getProperty('os.name')} ${System.getProperty('os.arch')} ${System.getProperty('os.version')}"
+            )
+        }
+    }
+
+    dependencies {
+        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+        testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from(components.java)
+            }
+        }
+        repositories {
+            maven {
+                name "mavel-local"
+                def releasesRepoUrl = "http://localhost:18081/repository/maven-releases/"
+                def snapshotsRepoUrl = "http://localhost:18081/repository/maven-snapshots/"
+                allowInsecureProtocol = true
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username project.repoUser
+                    password project.repoPassword
+                }
+            }
+        }
+    }
+}
