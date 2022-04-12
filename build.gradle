@@ -97,9 +97,9 @@ configure(allprojects) { project ->
         }
         repositories {
             maven {
-                name "mavel-local"
-                def releasesRepoUrl = "http://localhost:18081/repository/maven-releases/"
-                def snapshotsRepoUrl = "http://localhost:18081/repository/maven-snapshots/"
+                name "mavelLocal"
+                def releasesRepoUrl = "http://localhost:8081/repository/maven-releases/"
+                def snapshotsRepoUrl = "http://localhost:8081/repository/maven-snapshots/"
                 allowInsecureProtocol = true
                 url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
                 credentials {
